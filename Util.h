@@ -3,11 +3,17 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <crtdbg.h>
 
 /** Pointer array safe destroyer. */
 #define SAFE_DELETE_ARRAY(arr) {delete[](arr);(arr)=nullptr;}
 /** Pointer safe destroyer. */
-#define SAFE_DELETE(ptr) {delete (ptr);(ptr) = nullptr;}
+#define SAFE_DELETE(ptr)\
+	if( (ptr) != nullptr )\
+	{\
+		delete (ptr);\
+		(ptr) = nullptr;\
+	}
 
 using Length = const unsigned int;
 
@@ -75,5 +81,24 @@ inline std::vector<std::string> Split(const std::string& Str, const char Delimit
 		internal.push_back(temp);
 	}
 	return internal;
+}
+
+#ifdef _DEBUG
+/** 메모리 누수 확인용 new. */
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+
+#endif
+
+/**
+ * @brief 메모리 누수 확인, 프로그램 종료지점에서 체크.
+ */
+void CheckMemoryLeak()
+{
+	/** 디버그 플래그 설정. */
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	if(_CrtDumpMemoryLeaks() != 0)
+	{
+		printf("메모리 누수 발생\n");
+	}
 }
 
